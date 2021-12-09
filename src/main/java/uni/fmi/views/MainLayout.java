@@ -23,6 +23,7 @@ import java.util.List;
 import uni.fmi.views.helloworld.HelloWorldView;
 import uni.fmi.views.labels.LabelsView;
 import uni.fmi.views.tasklists.TaskListsView;
+import uni.fmi.views.tasks.BoardView;
 import uni.fmi.views.tasks.TasksView;
 import uni.fmi.views.users.UserOverview;
 
@@ -114,7 +115,8 @@ public class MainLayout extends AppLayout {
 
 	private List<RouterLink> createLinks() {
 		MenuItemInfo[] menuItems = new MenuItemInfo[] {
-				new MenuItemInfo("Tasks", "la la-globe", TasksView.class),
+				new MenuItemInfo("Board", "la la-globe", BoardView.class),
+				new MenuItemInfo("All Tasks", "la la-globe", TasksView.class),
 				new MenuItemInfo("Labels", "la la-globe", LabelsView.class),
 				new MenuItemInfo("Task Lists", "la la-globe", TaskListsView.class),
 				new MenuItemInfo("Hello World", "la la-globe", HelloWorldView.class),

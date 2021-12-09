@@ -1,10 +1,18 @@
 package uni.fmi.views.tasks;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.vaadin.componentfactory.multiselect.MultiComboBox;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
@@ -14,8 +22,11 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.EmailField;
+import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
@@ -23,8 +34,7 @@ import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import uni.fmi.data.entity.LabelEntity;
 import uni.fmi.data.entity.TaskEntity;
 import uni.fmi.data.entity.TaskListEntity;
@@ -33,24 +43,22 @@ import uni.fmi.data.service.TaskListService;
 import uni.fmi.data.service.TaskService;
 import uni.fmi.views.MainLayout;
 
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-
-@PageTitle("Tasks")
-@Route(value = "tasks", layout = MainLayout.class)
-public class TasksView extends VerticalLayout {
+@PageTitle("Board")
+@Route(value = "", layout = MainLayout.class)
+public class BoardView extends VerticalLayout {
     private static final long serialVersionUID = 1L;
     private TaskService taskService;
     private TaskListService taskListService;
     private LabelService labelService;
-    private Grid<TaskEntity> grid;
-    private ListDataProvider<TaskEntity> dataProvider;
+    private Map<TaskListEntity, Grid<TaskEntity>> grids;
+//    private List<Grid<TaskEntity>> grids;
+//    private ListDataProvider<TaskEntity> dataProvider;
+    private ListDataProvider<TaskListEntity> taskListDataProvider;
     private Label counter;
     private Collection<TaskEntity> tasks;
-    private Map<String, SerializablePredicate<TaskEntity>> filters;
+    private Collection<TaskListEntity> taskLists;
 
-    public TasksView(@Autowired final TaskService taskService, @Autowired final TaskListService taskListService, @Autowired final LabelService labelService) {
+    public BoardView(@Autowired final TaskService taskService, @Autowired final TaskListService taskListService, @Autowired final LabelService labelService) {
         this.taskService = taskService;
         this.taskListService = taskListService;
         this.labelService = labelService;
@@ -59,88 +67,64 @@ public class TasksView extends VerticalLayout {
     }
 
     private void init() {
-        grid = new Grid<TaskEntity>(TaskEntity.class, false);
-
-        filters = new HashMap<String, SerializablePredicate<TaskEntity>>();
-
+        taskLists = taskListService.findAll();
         tasks = taskService.findAll();
-        dataProvider = new ListDataProvider<TaskEntity>(tasks);
-        grid.setDataProvider(dataProvider);
-        grid.addItemDoubleClickListener(listener -> openTaskForm(listener.getItem()));
-        resetCounter();
-        final Column<TaskEntity> nameColumn = grid.addColumn(TaskEntity::getName);
-        nameColumn.setHeader("Name");
-        nameColumn.setSortable(true);
-        nameColumn.setFooter(counter);
 
-        final Column<TaskEntity> deadlineColumn = grid.addColumn(TaskEntity::getDeadline).setHeader("Deadline")
-                .setSortable(true);
+        grids = new HashMap<TaskListEntity, Grid<TaskEntity>>();
 
-        final Column<TaskEntity> labelsColumn = grid.addColumn(t -> String.join(", ", t.getLabels().stream().map(l -> l.getName()).collect(Collectors.toList()))).setHeader("Labels")
-                .setSortable(true);
+        for (TaskListEntity list: taskLists) {
+            var data = tasks.stream().filter(t -> t.getList().equals(list)).collect(Collectors.toList());
+            ListDataProvider<TaskEntity> dataProvider = new ListDataProvider<TaskEntity>(data);
+            Grid<TaskEntity> grid = new Grid<TaskEntity>(TaskEntity.class, false);
 
-        final Column<TaskEntity> taskListColumn = grid.addColumn(t -> t.getList().getName()).setHeader("Task List")
-                .setSortable(true);
+            grid.setDataProvider(dataProvider);
+            grid.addItemDoubleClickListener(listener -> openTaskForm(listener.getItem(), list));
 
-        final HeaderRow headerRow = grid.appendHeaderRow();
+            grids.put(list, grid);
 
-        // name filter
-        final TextField nameFilterField = new TextField();
-        nameFilterField.addValueChangeListener(l -> {
-            final String value = l.getValue();
-            filters.put("name", task -> StringUtils.containsIgnoreCase(task.getName(), value));
-            refreshFilter();
-        });
-        nameFilterField.setWidthFull();
-        headerRow.getCell(nameColumn).setComponent(nameFilterField);
+            resetCounter(list);
 
-        // deadline filter
-        final DatePicker deadlineFilterField = new DatePicker();
-        deadlineFilterField.addValueChangeListener(l -> {
-            final LocalDate value = l.getValue();
-            filters.put("deadline", task -> value == null || task.getDeadline().equals(value));
-            refreshFilter();
-        });
-        deadlineFilterField.setWidthFull();
-        headerRow.getCell(deadlineColumn).setComponent(deadlineFilterField);
+            final Column<TaskEntity> nameColumn = grid.addColumn(TaskEntity::getName);
+            nameColumn.setHeader("Name");
+            nameColumn.setSortable(true);
+            nameColumn.setFooter(counter);
 
-        // labels filter
-        final MultiComboBox<LabelEntity> labelsFilterField = new MultiComboBox<LabelEntity>();
+            final Column<TaskEntity> deadlineColumn = grid.addColumn(TaskEntity::getDeadline).setHeader("Deadline")
+                    .setSortable(true);
 
-        labelsFilterField.setDataProvider(labelService::fetchItems, labelService::count);
-        labelsFilterField.setItemLabelGenerator(LabelEntity::getName);
+            final Column<TaskEntity> labelsColumn = grid.addColumn(t -> String.join(", ", t.getLabels().stream().map(l -> l.getName()).collect(Collectors.toList()))).setHeader("Labels")
+                    .setSortable(true);
 
-        labelsFilterField.addValueChangeListener(l -> {
-            final Set<LabelEntity> value = l.getValue();
-            filters.put("labels", task -> task.getLabels().containsAll(value));
-            refreshFilter();
-        });
-        labelsFilterField.setWidthFull();
-        headerRow.getCell(labelsColumn).setComponent(labelsFilterField);
+            final HeaderRow headerRow = grid.appendHeaderRow();
 
-        // task lists filter
-        final ComboBox<TaskListEntity> taskListFilterField = new ComboBox<TaskListEntity>();
+            // name filter
+            final TextField nameFilterField = new TextField();
+            nameFilterField.addValueChangeListener(l -> {
+                final String value = l.getValue();
+                final SerializablePredicate<TaskEntity> filter = user -> StringUtils.containsIgnoreCase(user.getName(),
+                        value);
+                addFilter(filter, list);
+            });
+            nameFilterField.setWidthFull();
+            headerRow.getCell(nameColumn).setComponent(nameFilterField);
 
-        taskListFilterField.setDataProvider(taskListService::fetchItems, taskListService::count);
-        taskListFilterField.setItemLabelGenerator(TaskListEntity::getName);
+            // email filter
+//        final TextField emailFilterField = new TextField();
+//        emailFilterField.setWidthFull();
+//        headerRow.getCell(descriptionColumn).setComponent(emailFilterField);
 
-        taskListFilterField.addValueChangeListener(l -> {
-            final TaskListEntity value = l.getValue();
-            filters.put("taskList", task -> task.getList().equals(value));
-            refreshFilter();
-        });
-        taskListFilterField.setWidthFull();
-        headerRow.getCell(taskListColumn).setComponent(taskListFilterField);
-
-        add(createButtons(), grid);
+            add(createButtons(list), grid);
+        }
     }
 
-    private HorizontalLayout createButtons() {
+    private HorizontalLayout createButtons(TaskListEntity list) {
 
-        final Button addButton = new Button("Add", l -> openTaskForm(new TaskEntity()));
+        Grid<TaskEntity> grid = grids.get(list);
+
+        final Button addButton = new Button("Add", l -> openTaskForm(new TaskEntity(), list));
 
         addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        final Button edditButton = new Button("Edit", l -> openTaskForm(grid.asSingleSelect().getValue()));
+        final Button edditButton = new Button("Edit", l -> openTaskForm(grid.asSingleSelect().getValue(), list));
         edditButton.setEnabled(false);
         edditButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         final Button removeButton = new Button("Remove", l -> {
@@ -150,7 +134,7 @@ public class TasksView extends VerticalLayout {
             final H1 titel = new H1("Are you sure?");
             final Button ok = new Button("OK", l1 -> {
                 taskService.delete(grid.asSingleSelect().getValue().getId());
-                resetGrid();
+                resetGrid(list);
                 dialog.close();
             });
             final Button close = new Button("Close", l1 -> dialog.close());
@@ -174,9 +158,10 @@ public class TasksView extends VerticalLayout {
         return buttons;
     }
 
-    private void openTaskForm(final TaskEntity newTask) {
-        final Dialog dialog = new Dialog();
+    private void openTaskForm(final TaskEntity newTask, TaskListEntity list) {
+        Grid<TaskEntity> grid = grids.get(list);
 
+        final Dialog dialog = new Dialog();
         final TextField name = new TextField();
         final TextArea description = new TextArea();
         final DatePicker deadline = new DatePicker();
@@ -210,6 +195,7 @@ public class TasksView extends VerticalLayout {
         binder.forField(taskListsCombo)
             .bind(TaskEntity::getList, TaskEntity::setList);
 
+        newTask.setList(list);
         binder.readBean(newTask);
 
         final FormLayout formLayout = new FormLayout();
@@ -224,12 +210,15 @@ public class TasksView extends VerticalLayout {
             boolean beanIsValid = binder.writeBeanIfValid(newTask);
             if (beanIsValid) {
                 taskService.update(newTask);
-                resetGrid();
+                resetGrid(list);
+
+                if (!list.equals(newTask.getList())) {
+                    resetGrid(newTask.getList());
+                }
 
                 dialog.close();
             }
         });
-
         final Button close = new Button("Close", l1 -> dialog.close());
         final HorizontalLayout dialogButtons = new HorizontalLayout(ok, close);
         final VerticalLayout dialogBody = new VerticalLayout(formLayout, dialogButtons);
@@ -242,26 +231,34 @@ public class TasksView extends VerticalLayout {
         dialog.open();
     }
 
-    private void resetGrid() {
+    private void resetGrid(TaskListEntity list) {
+        Grid<TaskEntity> grid = grids.get(list);
         grid.select(null);
+        ListDataProvider<TaskEntity> dataProvider = (ListDataProvider<TaskEntity>)grid.getDataProvider();
         dataProvider.clearFilters();
-        tasks.clear();
-        tasks.addAll(taskService.findAll());
+        list.getTasks().clear();
+        list.getTasks().addAll(taskService.findAll().stream().filter(t -> t.getList().equals(list)).collect(Collectors.toList()));
+
+        grid.setDataProvider(new ListDataProvider<TaskEntity>(list.getTasks()));
         dataProvider.refreshAll();
-        resetCounter();
+        resetCounter(list);
     }
 
-    private void refreshFilter() {
+    private void addFilter(final SerializablePredicate<TaskEntity> filter, TaskListEntity list) {
+        Grid<TaskEntity> grid = grids.get(list);
+        ListDataProvider<TaskEntity> dataProvider = (ListDataProvider<TaskEntity>)grid.getDataProvider();
+
         dataProvider.clearFilters();
+        dataProvider.addFilter(filter);
 
-        for (Map.Entry<String, SerializablePredicate<TaskEntity>> set : filters.entrySet()) {
-            dataProvider.addFilter(set.getValue());
-        }
-
-        resetCounter();
+        grid.setDataProvider(dataProvider);
+        resetCounter(list);
     }
 
-    private void resetCounter() {
+    private void resetCounter(TaskListEntity list) {
+        Grid<TaskEntity> grid = grids.get(list);
+        ListDataProvider<TaskEntity> dataProvider = (ListDataProvider<TaskEntity>)grid.getDataProvider();
+
         if (counter == null) {
             counter = new Label();
         }
