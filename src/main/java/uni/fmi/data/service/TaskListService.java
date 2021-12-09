@@ -1,0 +1,39 @@
+package uni.fmi.data.service;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.vaadin.artur.helpers.CrudService;
+import uni.fmi.data.entity.LabelEntity;
+import uni.fmi.data.entity.TaskListEntity;
+import uni.fmi.data.repo.TaskListEntityRepo;
+
+import java.util.Collection;
+import java.util.stream.Stream;
+
+@Service
+public class TaskListService extends CrudService<TaskListEntity, Integer> {
+
+	private TaskListEntityRepo repository;
+
+	public TaskListService(@Autowired TaskListEntityRepo repository) {
+		this.repository = repository;
+	}
+
+	@Override
+	protected TaskListEntityRepo getRepository() {
+		return repository;
+	}
+
+	public Collection<TaskListEntity> findAll() {
+		return repository.findAll();
+	}
+
+	public Stream<TaskListEntity> fetchItems(String filter, int offset, int limit) {
+		return repository.findAll().stream().filter(u-> StringUtils.containsIgnoreCase(u.getName(), filter));
+	}
+
+	public int count(String filter) {
+		return (int) repository.findAll().stream().filter(u-> StringUtils.containsIgnoreCase(u.getName(), filter)).count();
+	}
+}
