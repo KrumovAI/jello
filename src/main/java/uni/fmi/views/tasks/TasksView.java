@@ -208,6 +208,7 @@ public class TasksView extends VerticalLayout {
             .bind(TaskEntity::getLabels, TaskEntity::setLabels);
 
         binder.forField(taskListsCombo)
+            .asRequired()
             .bind(TaskEntity::getList, TaskEntity::setList);
 
         binder.readBean(newTask);

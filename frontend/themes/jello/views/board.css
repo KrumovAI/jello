@@ -1,0 +1,20 @@
+.board {
+    padding: 2rem;
+
+    align-items: flex-start;
+}
+
+.board .task-list {
+    background-color: white;
+
+    padding: 1rem;
+}
+
+.board .task-list .task-list-heading {
+    width: 100%;
+    text-align: center;
+}
+
+.board .task-list .task-list-add-btn {
+    width: 100%;
+}

@@ -32,7 +32,7 @@ import uni.fmi.views.users.UserOverview;
  */
 @PWA(name = "Jello", shortName = "Jello", enableInstallPrompt = false)
 @Push
-@Theme(themeFolder = "myapp")
+@Theme(themeFolder = "jello")
 @PageTitle("Main")
 public class MainLayout extends AppLayout {
 	private static final long serialVersionUID = 1L;
@@ -117,10 +117,8 @@ public class MainLayout extends AppLayout {
 		MenuItemInfo[] menuItems = new MenuItemInfo[] {
 				new MenuItemInfo("Board", "la la-globe", BoardView.class),
 				new MenuItemInfo("All Tasks", "la la-globe", TasksView.class),
-				new MenuItemInfo("Labels", "la la-globe", LabelsView.class),
 				new MenuItemInfo("Task Lists", "la la-globe", TaskListsView.class),
-				new MenuItemInfo("Hello World", "la la-globe", HelloWorldView.class),
-				new MenuItemInfo("Users", "la la-globe", UserOverview.class),
+				new MenuItemInfo("Labels", "la la-globe", LabelsView.class),
 
 		};
 		List<RouterLink> links = new ArrayList<>();
