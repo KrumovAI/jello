@@ -9,7 +9,7 @@ import java.util.Date;
 @Entity
 public class TaskEntity extends AbstractEntity {
 
-    @Column(name = "title", length = 100, nullable = false)
+    @Column(name = "name", length = 100, nullable = false)
     private String name;
 
     @Column(name = "description", length = 255)
