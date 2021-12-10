@@ -9,7 +9,7 @@ import java.util.Set;
 @Entity
 public class LabelEntity extends AbstractEntity {
 
-    @Column(name = "name", length = 100, nullable = false)
+    @Column(name = "name", length = 100, nullable = false, unique = true)
     private String name;
 
     @ManyToMany(fetch = FetchType.EAGER)

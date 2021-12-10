@@ -9,7 +9,7 @@ import java.util.Set;
 @Entity
 public class TaskListEntity extends AbstractEntity {
 
-    @Column(name = "name", length = 50, nullable = false)
+    @Column(name = "name", length = 50, nullable = false, unique = true)
     private String name;
 
     @OneToMany(fetch = FetchType.EAGER)
