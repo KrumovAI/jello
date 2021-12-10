@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
-import uni.fmi.data.entity.LabelEntity;
 import uni.fmi.data.entity.TaskListEntity;
 import uni.fmi.data.repo.TaskListEntityRepo;
 

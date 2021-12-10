@@ -1,7 +1,7 @@
-# My App
+# Jello
 
-This project can be used as a starting point to create your own Vaadin application with Spring Boot.
-It contains all the necessary configuration and some placeholder files to get you started.
+This project was created for a university assignment. It serves as a task management system, imitating the most basic
+functionality of Trello, hence the name Jello (Java + Trello).
 
 ## Running the application
 

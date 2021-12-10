@@ -29,13 +29,6 @@ public class TaskEntity extends AbstractEntity {
 
     }
 
-    public TaskEntity(String name, String description, LocalDate deadline, TaskListEntity list) {
-        this.setName(name);
-        this.setDescription(description);
-        this.setDeadline(deadline);
-        this.setList(list);
-    }
-
     public String getName() {
         return name;
     }

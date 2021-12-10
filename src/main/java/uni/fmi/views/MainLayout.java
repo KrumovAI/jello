@@ -20,12 +20,10 @@ import com.vaadin.flow.theme.Theme;
 import java.util.ArrayList;
 import java.util.List;
 
-import uni.fmi.views.helloworld.HelloWorldView;
 import uni.fmi.views.labels.LabelsView;
 import uni.fmi.views.tasklists.TaskListsView;
 import uni.fmi.views.tasks.BoardView;
 import uni.fmi.views.tasks.TasksView;
-import uni.fmi.views.users.UserOverview;
 
 /**
  * The main view is a top-level placeholder for other views.

@@ -1,7 +1,6 @@
 package uni.fmi.views.tasks;
 
 import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import uni.fmi.data.entity.LabelEntity;
 import uni.fmi.data.entity.TaskEntity;
 

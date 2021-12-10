@@ -10,8 +10,6 @@ import uni.fmi.data.entity.TaskListEntity;
 import uni.fmi.data.repo.LabelEntityRepo;
 import uni.fmi.data.repo.TaskListEntityRepo;
 
-import java.awt.*;
-
 @SpringComponent
 public class DataGenerator {
 

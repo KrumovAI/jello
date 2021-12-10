@@ -25,16 +25,10 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.EmailField;
-import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
-import com.vaadin.flow.data.provider.ListDataProvider;
-import com.vaadin.flow.data.provider.Query;
-import com.vaadin.flow.data.selection.SingleSelect;
-import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
@@ -120,47 +114,7 @@ public class BoardView extends HorizontalLayout {
         }
     }
 
-//    private HorizontalLayout createButtons(TaskListEntity list) {
-//
-//        final Button addButton = new Button("Add", l -> openTaskForm(new TaskEntity(), list));
-//
-//        addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-//        final Button edditButton = new Button("Edit", l -> openTaskForm(grid.asSingleSelect().getValue(), list));
-//        edditButton.setEnabled(false);
-//        edditButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-//        final Button removeButton = new Button("Remove", l -> {
-//
-//            final Dialog dialog = new Dialog();
-//
-//            final H1 titel = new H1("Are you sure?");
-//            final Button ok = new Button("OK", l1 -> {
-//                taskService.delete(grid.asSingleSelect().getValue().getId());
-//                resetGrid(list);
-//                dialog.close();
-//            });
-//            final Button close = new Button("Close", l1 -> dialog.close());
-//            final HorizontalLayout dialogButtons = new HorizontalLayout(ok, close);
-//            final VerticalLayout dialogBody = new VerticalLayout(titel, dialogButtons);
-//            dialog.add(dialogBody);
-//            dialog.open();
-//
-//        });
-//        removeButton.setEnabled(false);
-//        removeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-//
-//        final SingleSelect<Grid<TaskEntity>, TaskEntity> asSingleSelect = grid.asSingleSelect();
-//        asSingleSelect.addValueChangeListener(l -> {
-//            final TaskEntity value = l.getValue();
-//            removeButton.setEnabled(value != null);
-//            edditButton.setEnabled(value != null);
-//        });
-//
-//        final HorizontalLayout buttons = new HorizontalLayout(addButton, edditButton, removeButton);
-//        return buttons;
-//    }
-
     private void openTaskForm(final TaskEntity task) {
-//        Grid<TaskEntity> grid = grids.get(list);
 
         final Dialog dialog = new Dialog();
         final TextField name = new TextField();
@@ -258,42 +212,5 @@ public class BoardView extends HorizontalLayout {
         dialog.add(dialogBody);
         dialog.open();
     }
-
-//    private void resetGrid(TaskListEntity list) {
-//        Grid<TaskEntity> grid = grids.get(list);
-//        grid.select(null);
-//        ListDataProvider<TaskEntity> dataProvider = (ListDataProvider<TaskEntity>)grid.getDataProvider();
-//        dataProvider.clearFilters();
-//        list.getTasks().clear();
-//        list.getTasks().addAll(taskService.findAll().stream().filter(t -> t.getList().equals(list)).collect(Collectors.toList()));
-//
-//        grid.setDataProvider(new ListDataProvider<TaskEntity>(list.getTasks()));
-//        dataProvider.refreshAll();
-//        resetCounter(list);
-//    }
-//
-//    private void addFilter(final SerializablePredicate<TaskEntity> filter, TaskListEntity list) {
-//        Grid<TaskEntity> grid = grids.get(list);
-//        ListDataProvider<TaskEntity> dataProvider = (ListDataProvider<TaskEntity>)grid.getDataProvider();
-//
-//        dataProvider.clearFilters();
-//        dataProvider.addFilter(filter);
-//
-//        grid.setDataProvider(dataProvider);
-//        resetCounter(list);
-//    }
-//
-//    private void resetCounter(TaskListEntity list) {
-//        Grid<TaskEntity> grid = grids.get(list);
-//        ListDataProvider<TaskEntity> dataProvider = (ListDataProvider<TaskEntity>)grid.getDataProvider();
-//
-//        if (counter == null) {
-//            counter = new Label();
-//        }
-//        final Query<TaskEntity, SerializablePredicate<TaskEntity>> query = new Query<TaskEntity, SerializablePredicate<TaskEntity>>(
-//                dataProvider.getFilter());
-//        counter.setText("" + dataProvider.size(query));
-//
-//    }
 
 }

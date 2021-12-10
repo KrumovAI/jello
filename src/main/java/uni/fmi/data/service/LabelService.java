@@ -8,7 +8,6 @@ import uni.fmi.data.entity.LabelEntity;
 import uni.fmi.data.repo.LabelEntityRepo;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Stream;
 
 @Service
@@ -28,10 +27,6 @@ public class LabelService extends CrudService<LabelEntity, Integer> {
 
 	public Collection<LabelEntity> findAll() {
 		return repository.findAll();
-	}
-
-	public void saveAll(List<LabelEntity> users) {
-		repository.saveAll(users);
 	}
 
 	public Stream<LabelEntity> fetchItems(String filter, int offset, int limit) {
